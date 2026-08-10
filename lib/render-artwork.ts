@@ -240,10 +240,19 @@ function drawBuilder(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
   ctx.fillText("BUILD STATION  /  247", 858, 102);
   line(ctx, 84, 122, 1118, 122, PINK, 2);
 
-  drawTextFit(ctx, "HACKER HOUSE", 80, 260, 1040, 160, 104, display, ink, 600);
+  const titleSize = Math.min(
+    fitText(ctx, "HACKER", 455, 154, 110, display, 600),
+    fitText(ctx, "HOUSE", 455, 154, 110, display, 600),
+  );
+  ctx.fillStyle = ink;
+  ctx.font = `600 ${titleSize}px ${display}`;
+  ctx.fillText("HACKER", 80, 260);
+  ctx.fillText("HOUSE", 665, 260);
   ctx.fillStyle = PINK;
-  ctx.font = `800 32px ${mono}`;
-  ctx.fillText("गोवा", 565, 230);
+  ctx.font = `800 64px "Nirmala UI", "Noto Sans Devanagari", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.fillText("गोवा", 600, 247);
+  ctx.textAlign = "left";
   ctx.fillStyle = ink;
   ctx.font = `700 28px ${mono}`;
   ctx.fillText("28—31 OCT 2026", 85, 305);
