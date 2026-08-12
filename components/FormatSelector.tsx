@@ -19,10 +19,11 @@ export function FormatSelector({ builder, crop, onSelect }: FormatSelectorProps)
       <h1 id="format-heading" className="flow-title">PICK YOUR <em>POISON.</em></h1>
       <div className="format-grid">
         <button className="format-poster format-poster--pfp" type="button" onClick={() => onSelect("pfp")}>
-          <span className="format-copy"><small>PFP MODE</small><strong>FRAME ME</strong><i>Turn your PFP into Goa property.</i></span>
+          <span className="format-copy"><small>PFP MODE / 1:1</small><strong>FRAME<br />MY FACE</strong><i>A punchy Goa badge, built to survive the circle crop.</i></span>
           <span className="format-art format-art--square">
             <ArtworkCanvas ref={pfpRef} format="pfp" photoSrc="/demo-builder.png" crop={crop} builder={builder} variant="classic" />
           </span>
+          <span className="format-spec" aria-hidden="true">1080 × 1080<br />SOCIAL READY</span>
           <span className="format-arrow" aria-hidden="true">↗</span>
         </button>
         <button className="format-poster format-poster--builder" type="button" onClick={() => onSelect("builder")}>

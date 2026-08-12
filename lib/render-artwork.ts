@@ -216,6 +216,53 @@ function drawOrnamentalBorder(ctx: CanvasRenderingContext2D, width: number, heig
   star(ctx, width - 56, height - 56, 18, PINK);
 }
 
+function drawRadialBurst(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  color: string,
+  rays = 28,
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = color;
+  for (let index = 0; index < rays; index += 1) {
+    if (index % 2 !== 0) continue;
+    const start = (Math.PI * 2 * index) / rays;
+    const end = (Math.PI * 2 * (index + 1)) / rays;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, radius, start, end);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPhotoCircle(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  box: { x: number; y: number; width: number; height: number },
+  crop: CropState,
+) {
+  const geometry = coverGeometry(image, box, crop);
+  const centerX = box.x + box.width / 2;
+  const centerY = box.y + box.height / 2;
+  const radius = Math.min(box.width, box.height) / 2;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.drawImage(image, geometry.x, geometry.y, geometry.width, geometry.height);
+  const shade = ctx.createLinearGradient(0, box.y + box.height * 0.45, 0, box.y + box.height);
+  shade.addColorStop(0, "rgba(3,47,28,0)");
+  shade.addColorStop(1, "rgba(3,47,28,0.54)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(box.x, box.y, box.width, box.height);
+  ctx.restore();
+}
+
 function drawBuilder(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
   const { display, mono } = fonts();
   const { builder, image, crop, variant } = input;
@@ -336,34 +383,117 @@ function drawBuilder(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
 function drawPfp(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
   const { display, mono } = fonts();
   const { image, crop, variant } = input;
-  const field = variant === "after-dark" ? "#041f16" : variant === "loud" ? YELLOW : GREEN;
+  const night = variant === "after-dark";
+  const loud = variant === "loud";
+  const field = night ? "#041f16" : loud ? YELLOW : GREEN;
+  const burst = loud ? PINK : night ? PINK : YELLOW;
+  const ink = loud ? DARK_GREEN : PAPER;
+  const ring = loud ? DARK_GREEN : YELLOW;
+  const portrait = { x: 206, y: 186, width: 668, height: 668 };
 
   ctx.fillStyle = field;
   ctx.fillRect(0, 0, PFP_SIZE.width, PFP_SIZE.height);
-  drawPhotoCover(ctx, image, { x: 54, y: 54, width: 972, height: 972 }, crop);
-  ctx.fillStyle = "rgba(11,104,57,0.84)";
-  ctx.fillRect(54, 54, 972, 176);
-  ctx.fillRect(54, 790, 972, 236);
-  drawOrnamentalBorder(ctx, PFP_SIZE.width, PFP_SIZE.height, field);
-  drawSun(ctx, 540, 180, 74, YELLOW);
-  drawPalm(ctx, 154, 930, 1.3, YELLOW);
-  drawPalm(ctx, 930, 930, 1.3, YELLOW);
 
-  ctx.fillStyle = YELLOW;
-  ctx.font = `700 54px ${mono}`;
-  ctx.fillText("HH", 92, 145);
-  ctx.textAlign = "right";
-  ctx.fillText("2026", 986, 145);
-  ctx.textAlign = "center";
-  ctx.font = `600 205px ${display}`;
-  ctx.fillText("GOA", 540, 953);
-  ctx.fillStyle = PINK;
+  ctx.save();
+  ctx.globalAlpha = loud ? 0.18 : 0.13;
+  drawRadialBurst(ctx, 540, 530, 690, burst);
+  ctx.restore();
+
+  ctx.save();
+  ctx.globalAlpha = 0.28;
+  ctx.fillStyle = loud ? DARK_GREEN : YELLOW;
+  for (let y = 80; y < 1030; y += 46) {
+    for (let x = 76 + ((y / 46) % 2) * 18; x < 1030; x += 46) {
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(540, 104);
+  ctx.rotate(-0.025);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(-318, -43, 636, 86);
+  ctx.strokeStyle = PINK;
+  ctx.lineWidth = 7;
+  ctx.strokeRect(-318, -43, 636, 86);
+  ctx.fillStyle = DARK_GREEN;
   ctx.font = `700 28px ${mono}`;
-  ctx.fillText("#FrameInGoa", 540, 1002);
+  ctx.textAlign = "center";
+  ctx.fillText("HACKER HOUSE  /  GOA 2026", 0, 11);
+  ctx.restore();
+
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.arc(563, 545, 376, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = ring;
+  ctx.beginPath();
+  ctx.arc(540, 520, 378, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = field;
+  ctx.beginPath();
+  ctx.arc(540, 520, 353, 0, Math.PI * 2);
+  ctx.fill();
+  drawPhotoCircle(ctx, image, portrait, crop);
+  ctx.strokeStyle = WHITE;
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.arc(540, 520, 334, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = PINK;
+  ctx.beginPath();
+  ctx.arc(170, 220, 74, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = WHITE;
-  ctx.font = `700 18px ${mono}`;
-  ctx.fillText("LESS NOISE / MORE SIGNAL", 540, 214);
+  ctx.font = `700 45px ${mono}`;
+  ctx.textAlign = "center";
+  ctx.fillText("HH", 170, 237);
+
+  ctx.fillStyle = ring;
+  ctx.beginPath();
+  ctx.arc(918, 245, 66, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = loud ? PAPER : DARK_GREEN;
+  ctx.font = `700 38px ${mono}`;
+  ctx.fillText("26", 918, 258);
+
+  ctx.save();
+  ctx.translate(540, 800);
+  ctx.rotate(-0.035);
+  ctx.fillStyle = PINK;
+  ctx.fillRect(-475, -83, 950, 166);
+  ctx.strokeStyle = ring;
+  ctx.lineWidth = 9;
+  ctx.strokeRect(-475, -83, 950, 166);
+  ctx.fillStyle = PAPER;
+  ctx.font = `700 31px ${mono}`;
+  ctx.fillText("FRAME IN", 0, -28);
+  ctx.fillStyle = loud ? DARK_GREEN : YELLOW;
+  ctx.font = `600 137px ${display}`;
+  ctx.fillText("GOA", 0, 74);
+  star(ctx, -425, 0, 22, PAPER);
+  star(ctx, 425, 0, 22, PAPER);
+  ctx.restore();
+
+  drawPalm(ctx, 122, 995, 1.05, ring);
+  drawPalm(ctx, 966, 995, 1.05, ring);
+  drawWave(ctx, 256, 964, 568, ink, 7);
+  ctx.fillStyle = ink;
+  ctx.font = `700 23px ${mono}`;
+  ctx.fillText("LESS NOISE", 92, 1018);
+  ctx.textAlign = "right";
+  ctx.fillText("MORE SIGNAL", 988, 1018);
+  ctx.textAlign = "center";
+  ctx.fillStyle = PINK;
+  ctx.font = `700 24px ${mono}`;
+  ctx.fillText("#FrameInGoa", 540, 1024);
   ctx.textAlign = "left";
+
+  drawOrnamentalBorder(ctx, PFP_SIZE.width, PFP_SIZE.height, field);
 }
 
 export function renderArtwork(canvas: HTMLCanvasElement, input: ArtworkInput) {

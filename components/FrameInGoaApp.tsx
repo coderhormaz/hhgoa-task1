@@ -94,25 +94,27 @@ export function FrameInGoaApp() {
             <HHGoaShell>
               <section className="hero">
                 <div className="hero-copy">
-                  <p className="hero-label">HH GOA 2026</p>
+                  <p className="hero-label"><span>HH GOA 2026</span><span>PROFILE DROP / 01</span></p>
                   <h1>
                     <span>FRAME</span>
                     <span className="hero-place"><em>IN</em><strong>GOA.</strong></span>
                   </h1>
-                  <p className="hero-sub">Your builder era deserves<br />a better profile picture.</p>
-                  <button className="primary-button hero-cta" type="button" onClick={() => setStage("format")}>MAKE YOURS ↗</button>
+                  <p className="hero-sub">Your builder era deserves<br /><b>a louder profile picture.</b></p>
+                  <button className="primary-button hero-cta" type="button" onClick={() => setStage("format")}><span>CLAIM YOUR FRAME</span><span aria-hidden="true">↗</span></button>
                   <p className="hero-date">28—31 OCT 2026 · GOA, INDIA</p>
                 </div>
                 <div className="hero-art" aria-label="Examples of generated HH Goa artwork">
+                  <span className="hero-art-index" aria-hidden="true">01</span>
                   <div className="hero-card">
                     <ArtworkCanvas ref={heroBuilderRef} format="builder" photoSrc="/demo-builder.png" crop={defaultCrop} builder={defaultBuilder} variant="classic" />
                   </div>
                   <div className="hero-pfp">
                     <ArtworkCanvas ref={heroPfpRef} format="pfp" photoSrc="/demo-builder.png" crop={defaultCrop} builder={defaultBuilder} variant="classic" />
                   </div>
-                  <span className="hero-note">YOUR PFP.<br />FRAME IN GOA. ↘</span>
+                  <span className="hero-note">PFP DROP<br />1:1 SIGNAL ↘</span>
+                  <span className="hero-sticker" aria-hidden="true">FRESH<br />FROM<br />GOA</span>
                 </div>
-                <div className="hero-bottom"><span>LESS NOISE. <b>MORE SIGNAL.</b></span></div>
+                <div className="hero-bottom"><span>LESS NOISE. <b>MORE SIGNAL.</b></span><span>SCROLL / TAP / SHIP</span></div>
               </section>
             </HHGoaShell>
           </motion.div>
