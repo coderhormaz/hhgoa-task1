@@ -287,18 +287,30 @@ function drawBuilder(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
   ctx.fillText("BUILD STATION  /  247", 858, 102);
   line(ctx, 84, 122, 1118, 122, PINK, 2);
 
-  const titleSize = Math.min(
-    fitText(ctx, "HACKER", 455, 154, 110, display, 600),
-    fitText(ctx, "HOUSE", 455, 154, 110, display, 600),
-  );
-  ctx.fillStyle = ink;
+  ctx.fillStyle = night ? DARK_GREEN : GREEN;
+  ctx.fillRect(70, 132, 1060, 158);
+
+  const ticketTitle = "HACKER HOUSE";
+  const titleSize = 190;
   ctx.font = `600 ${titleSize}px ${display}`;
-  ctx.fillText("HACKER", 80, 260);
-  ctx.fillText("HOUSE", 665, 260);
-  ctx.fillStyle = PINK;
-  ctx.font = `800 64px "Nirmala UI", "Noto Sans Devanagari", sans-serif`;
+  const titleScale = Math.min(1, 1015 / ctx.measureText(ticketTitle).width);
+  ctx.save();
+  ctx.translate(600, 278);
+  ctx.scale(titleScale, 1);
+  ctx.fillStyle = YELLOW;
   ctx.textAlign = "center";
-  ctx.fillText("गोवा", 600, 247);
+  ctx.fillText(ticketTitle, 0, 0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.font = `800 82px "Nirmala UI", "Noto Sans Devanagari", sans-serif`;
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 20;
+  ctx.strokeStyle = PINK;
+  ctx.strokeText("गोवा", 600, 257);
+  ctx.fillStyle = YELLOW;
+  ctx.fillText("गोवा", 600, 257);
+  ctx.restore();
   ctx.textAlign = "left";
   ctx.fillStyle = ink;
   ctx.font = `700 28px ${mono}`;

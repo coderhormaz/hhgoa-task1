@@ -21,9 +21,9 @@ Set `NEXT_PUBLIC_SITE_URL` to the public origin in production so canonical links
 
 ## Public result storage
 
-Public links are opt-in and upload only the final generated PNG—never the original photo. The Node runtime stores records and images under `data/results/`; `/b/[id]` and its Open Graph/Twitter metadata reference that exact uploaded artwork through `/api/share/[id]/image`.
+Public links are opt-in and need no visitor account. The server uploads only the final generated PNG—never the original photo—to Catbox's anonymous public upload API. The branded `/b/[id]` URL carries sanitized display metadata in a stateless token, so public pages also work on free/serverless deployments without a database or persistent disk.
 
-For self-hosting, mount `data/results/` on persistent storage. The route contract is intentionally isolated in `lib/share-store.ts`, so the storage adapter can be replaced without changing the generator or public-page API.
+Legacy filesystem-backed share IDs remain readable from `data/results/`. Anonymous third-party uploads are public, cannot be managed or deleted through this app, and remain subject to the storage provider's availability and acceptable-use rules.
 
 ## Output sizes
 

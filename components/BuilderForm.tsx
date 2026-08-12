@@ -21,7 +21,7 @@ export function BuilderForm({ value, onChange, onReroll }: BuilderFormProps) {
         <input
           value={value.name}
           onChange={(event) => update("name", event.target.value.slice(0, 60))}
-          placeholder="Satoshi from Bandra"
+          placeholder="e.g. Hormaz Daruwala"
           autoComplete="name"
         />
       </label>
@@ -30,7 +30,7 @@ export function BuilderForm({ value, onChange, onReroll }: BuilderFormProps) {
         <input
           value={value.stack}
           onChange={(event) => update("stack", event.target.value.slice(0, 90))}
-          placeholder="Solidity + AI + questionable sleep schedule"
+          placeholder="e.g. AI + Web3 + Next.js"
         />
       </label>
       <label>
@@ -38,7 +38,7 @@ export function BuilderForm({ value, onChange, onReroll }: BuilderFormProps) {
         <input
           value={value.handle}
           onChange={(event) => update("handle", event.target.value.replace(/\s/g, "").slice(0, 32))}
-          placeholder="@yourhandle"
+          placeholder="e.g. @hormaz"
           autoCapitalize="off"
           autoCorrect="off"
         />

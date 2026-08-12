@@ -460,6 +460,9 @@ button:disabled { cursor: wait; opacity: .75; }
 .share-actions .primary-button, .share-actions .share-x { width: 100%; font-size: 20px; }
 .create-link { justify-self: start; padding-left: 0; }
 .public-link { color: var(--yellow); font-size: 13px; font-weight: 900; }
+.public-link-ready { display: grid; gap: 12px; padding: 16px; border: 2px solid var(--yellow); background: var(--green-dark); }
+.public-link-ready > span { color: var(--pink); font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.public-link-ready > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .upload-consent { padding: 16px; border: 2px solid var(--pink); background: var(--green-dark); }
 .upload-consent p { margin: 0 0 12px; color: var(--white); font-size: 11px; line-height: 1.5; }
 .upload-consent > div { display: flex; gap: 10px; flex-wrap: wrap; }

@@ -15,13 +15,23 @@ import { ProgressRail } from "./ProgressRail";
 import { ResultPreview } from "./ResultPreview";
 import { RevealAnimation } from "./RevealAnimation";
 
-const defaultBuilder: BuilderData = {
+const exampleBuilder: BuilderData = {
   name: "Hormaz Daruwala",
   stack: "AI + Web3 + Next.js",
   handle: "@hormaz",
   builderClass: "Agent Architect",
   builderId: deterministicBuilderId("Hormaz Daruwala"),
 };
+
+function createEmptyBuilder(): BuilderData {
+  return {
+    name: "",
+    stack: "",
+    handle: "",
+    builderClass: pickBuilderClass("", 0),
+    builderId: deterministicBuilderId(""),
+  };
+}
 
 const defaultCrop: CropState = { zoom: 1, x: 0, y: -0.08 };
 
@@ -30,7 +40,7 @@ export function FrameInGoaApp() {
   const [format, setFormat] = useState<GeneratorFormat>("builder");
   const [photo, setPhoto] = useState<PhotoAsset | null>(null);
   const [crop, setCrop] = useState<CropState>(defaultCrop);
-  const [builder, setBuilder] = useState<BuilderData>(defaultBuilder);
+  const [builder, setBuilder] = useState<BuilderData>(createEmptyBuilder);
   const [reroll, setReroll] = useState(0);
   const [variant, setVariant] = useState<CardVariant>("classic");
   const heroBuilderRef = useRef<HTMLCanvasElement>(null);
@@ -77,7 +87,7 @@ export function FrameInGoaApp() {
     if (photo?.src.startsWith("blob:")) URL.revokeObjectURL(photo.src);
     setPhoto(null);
     setCrop(defaultCrop);
-    setBuilder(defaultBuilder);
+    setBuilder(createEmptyBuilder());
     setFormat("builder");
     setVariant("classic");
     setReroll(0);
@@ -106,10 +116,10 @@ export function FrameInGoaApp() {
                 <div className="hero-art" aria-label="Examples of generated HH Goa artwork">
                   <span className="hero-art-index" aria-hidden="true">01</span>
                   <div className="hero-card">
-                    <ArtworkCanvas ref={heroBuilderRef} format="builder" photoSrc="/demo-builder.png" crop={defaultCrop} builder={defaultBuilder} variant="classic" />
+                    <ArtworkCanvas ref={heroBuilderRef} format="builder" photoSrc="/demo-builder.png" crop={defaultCrop} builder={exampleBuilder} variant="classic" />
                   </div>
                   <div className="hero-pfp">
-                    <ArtworkCanvas ref={heroPfpRef} format="pfp" photoSrc="/demo-builder.png" crop={defaultCrop} builder={defaultBuilder} variant="classic" />
+                    <ArtworkCanvas ref={heroPfpRef} format="pfp" photoSrc="/demo-builder.png" crop={defaultCrop} builder={exampleBuilder} variant="classic" />
                   </div>
                   <span className="hero-note">PFP DROP<br />1:1 SIGNAL ↘</span>
                   <span className="hero-sticker" aria-hidden="true">FRESH<br />FROM<br />GOA</span>
@@ -127,7 +137,7 @@ export function FrameInGoaApp() {
 
               {stage === "format" ? (
                 <FormatSelector
-                  builder={defaultBuilder}
+                  builder={exampleBuilder}
                   crop={defaultCrop}
                   onSelect={(nextFormat) => { setFormat(nextFormat); setStage("photo"); }}
                 />

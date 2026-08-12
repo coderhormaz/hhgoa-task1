@@ -18,6 +18,7 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
   const [consentOpen, setConsentOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [publicUrl, setPublicUrl] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const caption = format === "builder"
     ? `${builder.builderClass} reporting from Goa 🌴\n\nBuilding. Shipping. Probably debugging by the beach.\n\n#FrameInGoa`
@@ -67,11 +68,36 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
       if (!response.ok || !payload.url) throw new Error(payload.error || "Storage failed");
       setPublicUrl(payload.url);
       setConsentOpen(false);
-      await navigator.clipboard?.writeText(payload.url);
+      await copyPublicUrl(payload.url);
     } catch {
-      setError("PUBLIC LINK FAILED. NOTHING WAS UPLOADED—YOUR LOCAL PNG IS SAFE.");
+      setError("PUBLIC LINK FAILED. NOTHING WAS SAVED HERE—YOUR LOCAL PNG IS STILL READY.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function copyPublicUrl(url = publicUrl) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(false);
+      setError("COPY FAILED. OPEN THE PUBLIC PAGE AND COPY ITS ADDRESS.");
+    }
+  }
+
+  async function sharePublicUrl() {
+    if (!publicUrl) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Frame In Goa — HH Goa 2026", text: caption, url: publicUrl });
+        return;
+      }
+      await copyPublicUrl();
+    } catch (reason) {
+      if (reason instanceof DOMException && reason.name === "AbortError") return;
+      setError("LINK SHARE FAILED. YOU CAN STILL OPEN OR COPY IT.");
     }
   }
 
@@ -90,19 +116,26 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
       )}
       <button type="button" className="outline-button share-x" onClick={() => void share()}>𝕏 SHARE TO X</button>
       {publicUrl ? (
-        <a className="public-link" href={publicUrl}>PUBLIC LINK COPIED ↗</a>
+        <div className="public-link-ready" role="status">
+          <span>● PUBLIC SIGNAL LIVE / NO LOGIN</span>
+          <a className="public-link" href={publicUrl} target="_blank" rel="noreferrer">OPEN PUBLIC PAGE ↗</a>
+          <div>
+            <button type="button" className="mini-button" onClick={() => void copyPublicUrl()}>{copied ? "COPIED ✓" : "COPY LINK"}</button>
+            <button type="button" className="mini-button" onClick={() => void sharePublicUrl()}>SHARE LINK ↗</button>
+          </div>
+        </div>
       ) : consentOpen ? (
         <div className="upload-consent">
-          <p>CREATING A PUBLIC LINK UPLOADS THIS FINAL PNG TO THIS SERVER. YOUR ORIGINAL PHOTO IS NOT UPLOADED.</p>
+          <p>NO ACCOUNT NEEDED. THIS UPLOADS ONLY YOUR FINAL PNG TO AN ANONYMOUS PUBLIC IMAGE HOST—NEVER THE ORIGINAL PHOTO. ANYONE WITH THE LINK CAN VIEW IT, AND ANONYMOUS UPLOADS CANNOT BE MANAGED OR DELETED LATER.</p>
           <div>
             <button type="button" className="mini-button" onClick={() => void uploadPublic()} disabled={uploading}>
-              {uploading ? "UPLOADING FINAL ARTWORK..." : "UPLOAD FINAL ARTWORK"}
+              {uploading ? "CREATING PUBLIC LINK..." : "I UNDERSTAND — CREATE LINK"}
             </button>
             <button type="button" className="text-button" onClick={() => setConsentOpen(false)}>CANCEL</button>
           </div>
         </div>
       ) : (
-        <button type="button" className="text-button create-link" onClick={() => setConsentOpen(true)}>CREATE PUBLIC LINK ↗</button>
+        <button type="button" className="text-button create-link" onClick={() => setConsentOpen(true)}>CREATE FREE PUBLIC LINK ↗</button>
       )}
       {error ? <p className="error-note" role="alert">{error}</p> : null}
     </div>
