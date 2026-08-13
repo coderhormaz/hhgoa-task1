@@ -47,8 +47,6 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
 
   async function uploadPublic() {
     const action = publicLinkAction;
-    const xWindow = action === "x" ? window.open("about:blank", "_blank") : null;
-    if (xWindow) xWindow.opener = null;
 
     try {
       setUploading(true);
@@ -64,20 +62,11 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
       setCopied(false);
       setConsentOpen(false);
       if (action === "x") {
-        if (xWindow && !xWindow.closed) {
-          try {
-            xWindow.location.replace(xShareIntent(format, payload.url));
-          } catch {
-            setError("PUBLIC LINK IS READY. X COULD NOT OPEN — TAP SHARE LINK TO X AGAIN.");
-          }
-        } else {
-          setError("PUBLIC LINK IS READY. YOUR BROWSER BLOCKED X — TAP SHARE LINK TO X AGAIN.");
-        }
+        window.location.assign(xShareIntent(format, payload.url));
       } else {
         await copyPublicUrl(payload.url);
       }
     } catch (reason) {
-      xWindow?.close();
       const message = reason instanceof Error ? reason.message.toUpperCase() : "PUBLIC LINK FAILED.";
       setError(`${message} YOUR LOCAL PNG IS STILL READY.`);
     } finally {

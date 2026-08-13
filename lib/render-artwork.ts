@@ -240,6 +240,62 @@ function drawRadialBurst(
   ctx.restore();
 }
 
+function drawBuildLoopBoard(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  mono: string,
+  night: boolean,
+) {
+  const boardInk = night ? DARK_GREEN : GREEN;
+
+  ctx.fillStyle = "rgba(3, 47, 28, .42)";
+  ctx.fillRect(x + 10, y + 12, width, height);
+  ctx.fillStyle = PAPER;
+  ctx.fillRect(x, y, width, height);
+  ctx.strokeStyle = boardInk;
+  ctx.lineWidth = 8;
+  ctx.strokeRect(x, y, width, height);
+
+  ctx.fillStyle = PINK;
+  ctx.fillRect(x + 18, y - 24, width - 36, 42);
+  ctx.fillStyle = WHITE;
+  ctx.font = `700 17px ${mono}`;
+  ctx.textAlign = "center";
+  ctx.fillText("BUILD / SHIP / REPEAT", x + width / 2, y + 4);
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = boardInk;
+  ctx.font = `700 13px ${mono}`;
+  ctx.fillText("GOA BUILD LOOP", x + 24, y + 44);
+  ctx.fillStyle = PINK;
+  ctx.textAlign = "right";
+  ctx.fillText("03 / LIVE", x + width - 24, y + 44);
+
+  const rows = [
+    { label: "MAKE", active: 4, color: YELLOW },
+    { label: "TEST", active: 3, color: PINK },
+    { label: "SHIP", active: 4, color: GREEN },
+  ];
+  rows.forEach((row, index) => {
+    const rowY = y + 70 + index * 27;
+    ctx.fillStyle = boardInk;
+    ctx.textAlign = "left";
+    ctx.font = `700 14px ${mono}`;
+    ctx.fillText(row.label, x + 24, rowY + 13);
+    for (let block = 0; block < 4; block += 1) {
+      ctx.fillStyle = block < row.active ? row.color : "#d8dfcf";
+      ctx.fillRect(x + 112 + block * 42, rowY, 30, 16);
+      ctx.strokeStyle = boardInk;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 112 + block * 42, rowY, 30, 16);
+    }
+  });
+  ctx.textAlign = "left";
+}
+
 function drawPhotoCircle(
   ctx: CanvasRenderingContext2D,
   image: HTMLImageElement,
@@ -312,30 +368,28 @@ function drawBuilder(ctx: CanvasRenderingContext2D, input: ArtworkInput) {
   ctx.fillText("गोवा", 600, 257);
   ctx.restore();
   ctx.textAlign = "left";
+  ctx.fillStyle = stock;
+  ctx.fillRect(70, 292, 1060, 42);
+  line(ctx, 84, 292, 1116, 292, PINK, 2);
+  line(ctx, 84, 334, 1116, 334, ink, 2);
   ctx.fillStyle = ink;
-  ctx.font = `700 28px ${mono}`;
-  ctx.fillText("28—31 OCT 2026", 85, 305);
-  ctx.fillText("2:47 PM STUDIO", 830, 305);
+  ctx.font = `700 21px ${mono}`;
+  ctx.textAlign = "left";
+  ctx.fillText("EVENT WINDOW  /  28—31 OCT 2026", 85, 321);
+  ctx.textAlign = "right";
+  ctx.fillText("LOCAL SIGNAL  /  2:47 PM STUDIO", 1114, 321);
+  ctx.textAlign = "left";
 
-  const photoBox = { x: 84, y: 340, width: 660, height: 570 };
+  const photoBox = { x: 84, y: 350, width: 660, height: 560 };
   ctx.fillStyle = GREEN;
-  ctx.fillRect(64, 320, 1090, 610);
+  ctx.fillRect(64, 338, 1090, 592);
   ctx.fillStyle = night ? DARK_GREEN : "#2b9b5d";
-  ctx.fillRect(744, 340, 390, 570);
+  ctx.fillRect(744, 350, 390, 560);
   drawSun(ctx, 945, 510, 92, YELLOW);
   for (let index = 0; index < 4; index += 1) drawWave(ctx, 772, 620 + index * 34, 332, WHITE, 6);
   drawPalm(ctx, 812, 885, 1.25, night ? YELLOW : DARK_GREEN);
   drawPalm(ctx, 1084, 890, 1.5, night ? YELLOW : DARK_GREEN);
-  ctx.fillStyle = WHITE;
-  ctx.fillRect(780, 730, 290, 120);
-  ctx.strokeStyle = GREEN;
-  ctx.lineWidth = 9;
-  ctx.strokeRect(780, 730, 290, 120);
-  ctx.fillStyle = PINK;
-  ctx.fillRect(822, 706, 208, 40);
-  ctx.fillStyle = WHITE;
-  ctx.font = `700 17px ${mono}`;
-  ctx.fillText("SHIP OR SHIP", 850, 733);
+  drawBuildLoopBoard(ctx, 774, 724, 330, 160, mono, night);
   drawPhotoCover(ctx, image, photoBox, crop);
   ctx.strokeStyle = YELLOW;
   ctx.lineWidth = 8;
