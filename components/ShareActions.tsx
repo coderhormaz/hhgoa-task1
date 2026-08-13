@@ -17,8 +17,9 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
   const [error, setError] = useState("");
   const [consentOpen, setConsentOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [publicUrl, setPublicUrl] = useState("");
+  const [publicShare, setPublicShare] = useState({ artworkUrl: "", publicUrl: "" });
   const [copied, setCopied] = useState(false);
+  const publicUrl = publicShare.artworkUrl === downloadUrl ? publicShare.publicUrl : "";
 
   const caption = format === "builder"
     ? `${builder.builderClass} reporting from Goa 🌴\n\nBuilding. Shipping. Probably debugging by the beach.\n\n#FrameInGoa`
@@ -66,11 +67,13 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
       const response = await fetch("/api/share", { method: "POST", body: formData });
       const payload = await response.json() as { url?: string; error?: string };
       if (!response.ok || !payload.url) throw new Error(payload.error || "Storage failed");
-      setPublicUrl(payload.url);
+      setPublicShare({ artworkUrl: downloadUrl, publicUrl: payload.url });
+      setCopied(false);
       setConsentOpen(false);
       await copyPublicUrl(payload.url);
-    } catch {
-      setError("PUBLIC LINK FAILED. NOTHING WAS SAVED HERE—YOUR LOCAL PNG IS STILL READY.");
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message.toUpperCase() : "PUBLIC LINK FAILED.";
+      setError(`${message} YOUR LOCAL PNG IS STILL READY.`);
     } finally {
       setUploading(false);
     }

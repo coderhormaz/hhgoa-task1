@@ -22,8 +22,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const base = await origin();
   const pageUrl = `${base}/b/${record.id}`;
   const imageUrl = record.imageUrl.startsWith("https://") ? record.imageUrl : `${base}${record.imageUrl}`;
-  const title = `${record.builderClass} reporting from Goa`;
-  const description = `${record.name} is locked in for HH Goa 2026. Less noise. More signal. #FrameInGoa`;
+  const title = record.format === "builder" ? `${record.builderClass} reporting from Goa` : "Frame In Goa — HH Goa 2026";
+  const description = record.format === "builder"
+    ? `${record.name} is locked in for HH Goa 2026. Less noise. More signal. #FrameInGoa`
+    : "A fresh HH Goa 2026 profile frame. Less noise. More signal. #FrameInGoa";
   return {
     title,
     description,

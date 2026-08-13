@@ -84,6 +84,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ id: record.id, url: new URL(`/b/${record.id}`, request.url).toString(), imageUrl });
   } catch (reason) {
+    console.error("[public-share] Anonymous upload failed", reason);
     const timedOut = reason instanceof DOMException && reason.name === "TimeoutError";
     return NextResponse.json(
       { error: timedOut ? "The public image host timed out. Please try again." : "Public artwork storage failed. Please try again." },
