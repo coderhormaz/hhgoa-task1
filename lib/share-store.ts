@@ -7,11 +7,12 @@ import type { ShareRecord } from "@/types/generator";
 
 const LEGACY_ID_PATTERN = /^hhg-26-[a-f0-9]{8}$/;
 const CATBOX_IMAGE_PATTERN = /^https:\/\/files\.catbox\.moe\/[a-z0-9]+\.png$/i;
+const COMPACT_ID_PATTERN = /^(b|p)-([a-z0-9]{5,32})$/i;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{20,700}$/;
 const storageRoot = path.join(process.cwd(), "data", "results");
 
 export function validShareId(id: string) {
-  return LEGACY_ID_PATTERN.test(id) || TOKEN_PATTERN.test(id);
+  return COMPACT_ID_PATTERN.test(id) || LEGACY_ID_PATTERN.test(id) || TOKEN_PATTERN.test(id);
 }
 
 function cleanText(value: unknown, max: number) {
@@ -30,23 +31,32 @@ interface ShareTokenPayload {
 
 export function createShareRecord(input: {
   format: GeneratorFormat;
-  name: string;
-  builderClass: string;
-  builderId: string;
   imageUrl: string;
 }) {
-  if (!CATBOX_IMAGE_PATTERN.test(input.imageUrl)) throw new Error("Unsupported public image URL.");
-  const payload: ShareTokenPayload = {
-    v: 1,
-    f: input.format === "pfp" ? "p" : "b",
-    n: cleanText(input.name, 60) || "Goa Builder",
-    c: cleanText(input.builderClass, 60) || "Ship Machine",
-    b: cleanText(input.builderId, 24) || "HHG-26-247",
-    u: input.imageUrl,
-    t: new Date().toISOString(),
+  const id = compactShareId(input.format, input.imageUrl);
+  if (!id) throw new Error("Unsupported public image URL.");
+  return compactIdToRecord(id)!;
+}
+
+export function compactShareId(format: GeneratorFormat, imageUrl: string) {
+  if (!CATBOX_IMAGE_PATTERN.test(imageUrl)) return null;
+  const imageId = new URL(imageUrl).pathname.slice(1, -4);
+  return `${format === "pfp" ? "p" : "b"}-${imageId}`;
+}
+
+function compactIdToRecord(id: string): ShareRecord | null {
+  const match = COMPACT_ID_PATTERN.exec(id);
+  if (!match) return null;
+  const format: GeneratorFormat = match[1].toLowerCase() === "p" ? "pfp" : "builder";
+  return {
+    id,
+    format,
+    name: format === "pfp" ? "Goa Builder" : "HH Goa Builder",
+    builderClass: "Builder Signal",
+    builderId: "HH GOA 2026",
+    createdAt: new Date(0).toISOString(),
+    imageUrl: `https://files.catbox.moe/${match[2].toLowerCase()}.png`,
   };
-  const id = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
-  return tokenToRecord(id, payload);
 }
 
 function tokenToRecord(id: string, payload: ShareTokenPayload): ShareRecord {
@@ -90,6 +100,8 @@ export async function writeShareRecord(record: ShareRecord, image: Uint8Array) {
 }
 
 export async function readShareRecord(id: string): Promise<ShareRecord | null> {
+  const compactRecord = compactIdToRecord(id);
+  if (compactRecord) return compactRecord;
   const tokenRecord = readShareToken(id);
   if (tokenRecord) return tokenRecord;
   if (!LEGACY_ID_PATTERN.test(id)) return null;

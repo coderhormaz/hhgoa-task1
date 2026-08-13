@@ -7,10 +7,6 @@ export const runtime = "nodejs";
 const MAX_PNG_BYTES = 8 * 1024 * 1024;
 const CATBOX_UPLOAD_URL = "https://catbox.moe/user/api.php";
 
-function cleanText(value: unknown, max: number) {
-  return typeof value === "string" ? value.replace(/[\u0000-\u001f]/g, "").trim().slice(0, max) : "";
-}
-
 function pngDimensions(bytes: Uint8Array) {
   if (bytes.byteLength < 24) return null;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -77,9 +73,6 @@ export async function POST(request: Request) {
     const imageUrl = await uploadAnonymousPng(new File([imageBytes], image.name, { type: "image/png" }));
     const record = createShareRecord({
       format,
-      name: cleanText(source.name, 60) || "Goa Builder",
-      builderClass: cleanText(source.builderClass, 60) || "Ship Machine",
-      builderId: cleanText(source.builderId, 24) || "HHG-26-247",
       imageUrl,
     });
     return NextResponse.json({ id: record.id, url: new URL(`/b/${record.id}`, request.url).toString(), imageUrl });
