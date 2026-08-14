@@ -4,8 +4,13 @@ import type { GeneratorFormat } from "@/types/generator";
 
 export const runtime = "nodejs";
 
-const MAX_PNG_BYTES = 8 * 1024 * 1024;
+const MAX_PNG_BYTES = 4 * 1024 * 1024;
 const CATBOX_UPLOAD_URL = "https://catbox.moe/user/api.php";
+
+const VALID_PNG_DIMENSIONS: Record<GeneratorFormat, ReadonlyArray<readonly [number, number]>> = {
+  builder: [[720, 900], [1200, 1500]],
+  pfp: [[720, 720], [1080, 1080]],
+};
 
 function pngDimensions(bytes: Uint8Array) {
   if (bytes.byteLength < 24) return null;
@@ -15,9 +20,10 @@ function pngDimensions(bytes: Uint8Array) {
 
 function expectedDimensions(format: GeneratorFormat, bytes: Uint8Array) {
   const dimensions = pngDimensions(bytes);
-  return format === "pfp"
-    ? dimensions?.width === 1080 && dimensions.height === 1080
-    : dimensions?.width === 1200 && dimensions.height === 1500;
+  if (!dimensions) return false;
+  return VALID_PNG_DIMENSIONS[format].some(
+    ([width, height]) => dimensions.width === width && dimensions.height === height,
+  );
 }
 
 async function uploadAnonymousPng(file: File) {

@@ -16,6 +16,12 @@ interface ShareActionsProps {
 
 type PublicLinkAction = "copy" | "x";
 
+const PUBLIC_SHARE_DIMENSIONS: Record<GeneratorFormat, { width: number; height: number }> = {
+  builder: { width: 720, height: 900 },
+  pfp: { width: 720, height: 720 },
+};
+const MAX_PUBLIC_SHARE_BYTES = 4 * 1024 * 1024;
+
 export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareActionsProps) {
   const [error, setError] = useState("");
   const [consentOpen, setConsentOpen] = useState(false);
@@ -27,10 +33,25 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
 
   const caption = xShareCaption(format);
 
-  async function getFile() {
-    const canvas = canvasRef.current;
-    if (!canvas) throw new Error("ARTWORK IS STILL LOCKING IN. TRY AGAIN.");
-    const blob = await canvasToBlob(canvas);
+  async function getPublicShareFile() {
+    const sourceCanvas = canvasRef.current;
+    if (!sourceCanvas) throw new Error("ARTWORK IS STILL LOCKING IN. TRY AGAIN.");
+
+    const { width, height } = PUBLIC_SHARE_DIMENSIONS[format];
+    const shareCanvas = document.createElement("canvas");
+    shareCanvas.width = width;
+    shareCanvas.height = height;
+    const context = shareCanvas.getContext("2d");
+    if (!context) throw new Error("PUBLIC SHARE COPY COULD NOT BE CREATED.");
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(sourceCanvas, 0, 0, width, height);
+
+    const blob = await canvasToBlob(shareCanvas);
+    if (blob.size > MAX_PUBLIC_SHARE_BYTES) {
+      throw new Error("PUBLIC SHARE COPY IS TOO LARGE. TRY A DIFFERENT PHOTO.");
+    }
     const base = format === "builder" ? `hh-goa-${safeFileSlug(builder.name)}` : "frame-in-goa";
     return new File([blob], `${base}.png`, { type: "image/png" });
   }
@@ -51,13 +72,18 @@ export function ShareActions({ canvasRef, downloadUrl, format, builder }: ShareA
     try {
       setUploading(true);
       setError("");
-      const file = await getFile();
+      const file = await getPublicShareFile();
       const formData = new FormData();
       formData.append("image", file);
       formData.append("metadata", JSON.stringify({ format }));
       const response = await fetch("/api/share", { method: "POST", body: formData });
-      const payload = await response.json() as { url?: string; error?: string };
-      if (!response.ok || !payload.url) throw new Error(payload.error || "Storage failed");
+      const payload = await response.json().catch(() => null) as { url?: string; error?: string } | null;
+      if (!response.ok || !payload?.url) {
+        const fallback = response.status === 413
+          ? "PUBLIC SHARE COPY WAS TOO LARGE FOR THE HOST."
+          : `PUBLIC STORAGE REQUEST FAILED (${response.status}).`;
+        throw new Error(payload?.error || fallback);
+      }
       setPublicShare({ artworkUrl: downloadUrl, publicUrl: payload.url });
       setCopied(false);
       setConsentOpen(false);
